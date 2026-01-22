@@ -137,58 +137,6 @@ If you built a POC with AutoGen ~1 year ago (2024-2025), be aware:
 
 **Our advice**: Don't try to migrate. Evaluate fresh with Pydantic AI or LangGraph.
 
-### Framework Progression Path
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│              RECOMMENDED PROGRESSION FOR INSURANCE TEAMS             │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│   PHASE 1: Learn & POC (Weeks 1-4)                                  │
-│   ────────────────────────────────                                  │
-│   Framework: Pydantic AI                                            │
-│   Why: Simplest path to type-safe agents                            │
-│   Goal: Build one working agent with tools + structured output      │
-│                                                                      │
-│   PHASE 2: Production MVP (Weeks 5-12)                              │
-│   ──────────────────────────────────                                │
-│   Framework: Pydantic AI + basic orchestration                      │
-│   Why: Same framework, add complexity gradually                      │
-│   Goal: Two-agent pipeline (verification → decision)                │
-│                                                                      │
-│   PHASE 3: Scale & Complexity (When Needed)                         │
-│   ─────────────────────────────────────────                         │
-│   Framework: LangGraph (if workflows get complex)                   │
-│   Why: Explicit state machines, checkpointing, LangSmith debugging  │
-│   Goal: Complex multi-step workflows with conditional routing       │
-│                                                                      │
-│   OPTIONAL: Prompt Optimization                                      │
-│   ────────────────────────────────                                  │
-│   Framework: DSPy + GEPA                                            │
-│   Why: Automatically improve prompts based on evaluation data       │
-│   Goal: Optimize prompts when accuracy plateaus                     │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Frameworks to Avoid Initially
-
-| Framework | Why Not for New Insurance Teams |
-|-----------|--------------------------------|
-| **AutoGen** | Learning curve + your old POC code won't work anyway |
-| **CrewAI** | "Chatty" agents may hallucinate data formats; token-heavy |
-| **Semantic Kernel** | Steep learning curve, Microsoft/Azure-centric |
-| **Smolagents** | Too new, limited documentation |
-| **OpenAI Agents SDK** | OpenAI-only lock-in; no model flexibility |
-
-### Frameworks to Consider Later
-
-| Framework | When to Consider |
-|-----------|------------------|
-| **LangGraph** | When you need complex conditional workflows, checkpointing, or visual debugging (LangSmith) |
-| **DSPy** | When you have evaluation data and want to auto-optimize prompts |
-| **LlamaIndex** | When you need to combine agents with document retrieval (RAG) |
-
 ### Insurance-Specific Code Example
 
 Here's what a Pydantic AI agent looks like with insurance data structures:
@@ -413,90 +361,114 @@ All 10 frameworks were tested with both real OpenAI API and z.ai (OpenAI-compati
 
 ## Which Framework Should You Choose?
 
-Use this decision flowchart to narrow down your options:
+> **Interactive Version**: Open [decision_flowchart.html](decision_flowchart.html) in your browser for a clickable wizard, or run `python decision_flowchart.py` for a CLI version.
 
-### Decision Flowchart (Mermaid)
+### Visual Decision Flowchart
+
+```
+                         ┌─────────────────────────┐
+                         │         START           │
+                         │   Choose a Framework    │
+                         └───────────┬─────────────┘
+                                     │
+                                     ▼
+                    ┌────────────────────────────────┐
+                    │   Need type-safe structured    │
+                    │   outputs? (Pydantic models)   │
+                    └────────────────┬───────────────┘
+                                     │
+             ┌───────────────────────┼───────────────────────┐
+             │ YES                   │                    NO │
+             ▼                       │                       ▼
+   ┌───────────────────┐             │         ┌────────────────────────┐
+   │   PYDANTIC AI     │             │         │   Using only Claude    │
+   │   ⭐ Recommended   │             │         │   (Anthropic) models?  │
+   │   for insurance   │             │         └───────────┬────────────┘
+   └───────────────────┘             │                     │
+                                     │        ┌────────────┼────────────┐
+                                     │        │ YES        │         NO │
+                                     │        ▼            │            ▼
+                                     │  ┌───────────┐      │   ┌─────────────────┐
+                                     │  │ ANTHROPIC │      │   │ Using only      │
+                                     │  │ SDK       │      │   │ OpenAI models?  │
+                                     │  └───────────┘      │   └────────┬────────┘
+                                     │                     │            │
+                                     │                     │   ┌────────┼────────┐
+                                     │                     │   │YES     │     NO │
+                                     │                     │   ▼        │        ▼
+                                     │                     │ ┌──────────────┐  ┌─────────┐
+                                     │                     │ │ Simple       │  │ See     │
+                                     │                     │ │ handoffs?    │  │ below   │
+                                     │                     │ └──────┬───────┘  └────┬────┘
+                                     │                     │        │               │
+                                     │                     │   YES: OPENAI         │
+                                     │                     │   AGENTS SDK          │
+                                     │                     │                       │
+                                     └─────────────────────┴───────────────────────┘
+
+     ┌─────────────────────────────────────────────────────────────────────────────┐
+     │                        ADDITIONAL DECISION POINTS                           │
+     ├─────────────────────────────────────────────────────────────────────────────┤
+     │                                                                              │
+     │   Need RAG / Document Retrieval?  ──────────────────►  LLAMAINDEX           │
+     │                                                                              │
+     │   Need explicit state machine / debugging?  ────────►  LANGGRAPH            │
+     │                                                                              │
+     │   Azure / Microsoft enterprise?  ───────────────────►  SEMANTIC KERNEL      │
+     │                                                                              │
+     │   Role-based team design?  ─────────────────────────►  CREWAI               │
+     │                                                                              │
+     │   Shared conversation context?  ────────────────────►  AUTOGEN              │
+     │                                                                              │
+     │   Quick prototype / minimal code?  ─────────────────►  SMOLAGENTS           │
+     │                                                                              │
+     │   NLP pipelines / document processing?  ────────────►  HAYSTACK             │
+     │                                                                              │
+     │   Prompt optimization (any framework)?  ────────────►  DSPY                 │
+     │                                                                              │
+     └─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Mermaid Flowchart (renders on GitHub)
 
 ```mermaid
 flowchart TD
-    START([Start: Choose a Framework]) --> Q1{Need type-safe<br/>structured outputs?}
+    START([Start]) --> Q1{Need type-safe<br/>structured outputs?}
 
-    Q1 -->|Yes| PYDANTIC[✅ Pydantic AI<br/>Full Pydantic validation]
-    Q1 -->|No| Q2{Using only<br/>Claude models?}
+    Q1 -->|Yes| PYDANTIC[✅ Pydantic AI]
+    Q1 -->|No| Q2{Claude only?}
 
-    Q2 -->|Yes| ANTHROPIC[✅ Anthropic<br/>Native Claude integration]
-    Q2 -->|No| Q3{Using only<br/>OpenAI models?}
+    Q2 -->|Yes| ANTHROPIC[✅ Anthropic SDK]
+    Q2 -->|No| Q3{OpenAI only?}
 
-    Q3 -->|Yes| Q4{Need simple<br/>agent handoffs?}
-    Q3 -->|No| Q5{Need document<br/>retrieval RAG?}
+    Q3 -->|Yes| Q4{Simple handoffs?}
+    Q3 -->|No| Q5{Need RAG?}
 
-    Q4 -->|Yes| OPENAI[✅ OpenAI Agents SDK<br/>Simplest handoffs]
+    Q4 -->|Yes| OPENAI[✅ OpenAI Agents]
     Q4 -->|No| Q5
 
-    Q5 -->|Yes| LLAMAINDEX[✅ LlamaIndex<br/>Best RAG integration]
-    Q5 -->|No| Q6{Need explicit<br/>state machine?}
+    Q5 -->|Yes| LLAMAINDEX[✅ LlamaIndex]
+    Q5 -->|No| Q6{State machine?}
 
-    Q6 -->|Yes| LANGGRAPH[✅ LangGraph<br/>Debuggable workflows]
-    Q6 -->|No| Q7{Azure/Enterprise<br/>environment?}
+    Q6 -->|Yes| LANGGRAPH[✅ LangGraph]
+    Q6 -->|No| Q7{Azure/Enterprise?}
 
-    Q7 -->|Yes| SEMANTIC[✅ Semantic Kernel<br/>Azure ecosystem]
-    Q7 -->|No| Q8{Role-based<br/>team design?}
+    Q7 -->|Yes| SEMANTIC[✅ Semantic Kernel]
+    Q7 -->|No| Q8{Role-based team?}
 
-    Q8 -->|Yes| CREWAI[✅ CrewAI<br/>Intuitive roles/tasks]
-    Q8 -->|No| Q9{Collaborative<br/>shared context?}
+    Q8 -->|Yes| CREWAI[✅ CrewAI]
+    Q8 -->|No| Q9{Shared context?}
 
-    Q9 -->|Yes| AUTOGEN[✅ AutoGen<br/>Group chat patterns]
-    Q9 -->|No| Q10{Quick prototype<br/>lightweight?}
+    Q9 -->|Yes| AUTOGEN[✅ AutoGen]
+    Q9 -->|No| Q10{Quick prototype?}
 
-    Q10 -->|Yes| SMOLAGENTS[✅ Smolagents<br/>Fast prototyping]
-    Q10 -->|No| HAYSTACK[✅ Haystack<br/>Modular pipelines]
-```
+    Q10 -->|Yes| SMOLAGENTS[✅ Smolagents]
+    Q10 -->|No| HAYSTACK[✅ Haystack]
 
-### Text-Based Decision Tree
-
-```
-START: What are your primary requirements?
-│
-├─► "We're a NEW TEAM building our first agent system"
-│   │
-│   ├─► "We need structured data (insurance, finance, healthcare)"
-│   │   └─► Pydantic AI ⭐⭐⭐ (HIGHLY RECOMMENDED)
-│   │
-│   └─► "We just need a quick prototype"
-│       └─► Smolagents or OpenAI Agents SDK
-│
-├─► "I need full type safety and structured Pydantic outputs"
-│   └─► Pydantic AI ⭐
-│
-├─► "I'm using Claude models exclusively"
-│   └─► Anthropic (direct API) ⭐
-│
-├─► "I'm using OpenAI models exclusively"
-│   ├─► "I want the simplest possible multi-agent setup"
-│   │   └─► OpenAI Agents SDK ⭐
-│   └─► "I need more control or RAG"
-│       └─► Continue below...
-│
-├─► "I need to combine agents with document retrieval (RAG)"
-│   └─► LlamaIndex ⭐
-│
-├─► "I need explicit, debuggable state machine workflows"
-│   └─► LangGraph ⭐
-│
-├─► "I'm in an Azure/Microsoft enterprise environment"
-│   └─► Semantic Kernel ⭐
-│
-├─► "I want role-based agents with clear responsibilities"
-│   └─► CrewAI ⭐
-│
-├─► "I need agents with shared conversation context"
-│   └─► AutoGen ⭐
-│
-├─► "I want quick prototyping with minimal setup"
-│   └─► Smolagents ⭐
-│
-└─► "I'm building NLP pipelines with some agent capabilities"
-    └─► Haystack ⭐
+    style PYDANTIC fill:#7c3aed,color:#fff
+    style LANGGRAPH fill:#2563eb,color:#fff
+    style OPENAI fill:#10a37f,color:#fff
+    style ANTHROPIC fill:#d97706,color:#fff
 ```
 
 ### Quick Selection by Priority
