@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Framework Decision Guide</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tab.active {
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            color: white;
+        }
+
+        .panel {
+            display: none;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Interactive Wizard Styles */
+        .wizard {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .question-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-number {
+            font-size: 0.9rem;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: #00d4ff;
+        }
+
+        .option-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .option-desc {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2));
+            border: 2px solid #00d4ff;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .result-framework {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+
+        .result-why {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .result-details {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .result-details h4 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .result-details code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .restart-btn {
+            padding: 14px 32px;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 6px;
+            color: #e0e0e0;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Flowchart Styles */
+        #flowchart {
+            width: 100%;
+            height: 700px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .flowchart-legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Quick Reference Table */
+        .quick-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .quick-table th, .quick-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .quick-table th {
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .quick-table tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+
+        .tag-recommended {
+            background: rgba(0,212,255,0.3);
+            color: #00d4ff;
+        }
+
+        .tag-type-safety {
+            background: rgba(124,58,237,0.3);
+            color: #a78bfa;
+        }
+
+        .tag-simple {
+            background: rgba(52,211,153,0.3);
+            color: #34d399;
+        }
+
+        .tag-enterprise {
+            background: rgba(251,191,36,0.3);
+            color: #fbbf24;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .question-text { font-size: 1.2rem; }
+            .panel { padding: 20px; }
+            #flowchart { height: 500px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Agent Framework Decision Guide</h1>
+            <p class="subtitle">Find the right framework for your insurance/enterprise project</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showPanel('wizard')">Interactive Wizard</button>
+            <button class="tab" onclick="showPanel('flowchart')">Visual Flowchart</button>
+            <button class="tab" onclick="showPanel('table')">Quick Reference</button>
+        </div>
+
+        <!-- Interactive Wizard Panel -->
+        <div id="wizard-panel" class="panel active">
+            <div class="wizard" id="wizard">
+                <!-- Questions rendered by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Flowchart Panel -->
+        <div id="flowchart-panel" class="panel">
+            <div id="flowchart"></div>
+            <div class="flowchart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00d4ff;"></div>
+                    <span>Question</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #34d399;"></div>
+                    <span>Framework (Result)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #7c3aed;"></div>
+                    <span>Start</span>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 15px; color: #a0a0a0;">
+                Drag to pan, scroll to zoom, click nodes for details
+            </p>
+        </div>
+
+        <!-- Quick Reference Panel -->
+        <div id="table-panel" class="panel">
+            <h2 style="margin-bottom: 20px;">Quick Framework Selection</h2>
+            <table class="quick-table">
+                <thead>
+                    <tr>
+                        <th>Priority / Requirement</th>
+                        <th>Framework</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>New Team + Regulated Industry</strong></td>
+                        <td>Pydantic AI <span class="tag tag-recommended">RECOMMENDED</span></td>
+                        <td>Type safety prevents hallucinated data formats, best for insurance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Type Safety & Validation</strong></td>
+                        <td>Pydantic AI <span class="tag tag-type-safety">TYPE-SAFE</span></td>
+                        <td>Full Pydantic validation, IDE autocomplete, dependency injection</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debuggable Workflows</strong></td>
+                        <td>LangGraph</td>
+                        <td>Explicit state machine, step-by-step visibility, LangSmith integration</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Maximum Simplicity</strong></td>
+                        <td>OpenAI Agents SDK <span class="tag tag-simple">SIMPLE</span></td>
+                        <td>Minimal abstractions, just works (OpenAI only)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Document Retrieval (RAG)</strong></td>
+                        <td>LlamaIndex</td>
+                        <td>Built for document retrieval and knowledge bases</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Azure / Microsoft</strong></td>
+                        <td>Semantic Kernel <span class="tag tag-enterprise">ENTERPRISE</span></td>
+                        <td>Microsoft ecosystem, Azure AI integration</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Role-Based Teams</strong></td>
+                        <td>CrewAI</td>
+                        <td>Intuitive role/goal/backstory design, task dependencies</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Shared Conversation Context</strong></td>
+                        <td>AutoGen</td>
+                        <td>Group chat patterns, collaborative agents</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quick Prototype</strong></td>
+                        <td>Smolagents <span class="tag tag-simple">LIGHTWEIGHT</span></td>
+                        <td>Minimal code, fast iteration, Hugging Face ecosystem</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NLP Pipelines</strong></td>
+                        <td>Haystack</td>
+                        <td>Modular components, document processing focus</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Claude Models Only</strong></td>
+                        <td>Anthropic SDK</td>
+                        <td>Native Claude tool support, direct API control</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prompt Optimization</strong></td>
+                        <td>DSPy <span class="tag tag-recommended">OPTIMIZER</span></td>
+                        <td>Automatic prompt improvement, works with any framework</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Framework data
+        const frameworks = {
+            pydantic_ai: {
+                name: "Pydantic AI",
+                icon: "🎯",
+                install: "pip install pydantic-ai",
+                why: "Full Pydantic validation ensures your LLM outputs match your data models exactly. Best for regulated industries (insurance, finance, healthcare) where data integrity is critical.",
+                strengths: ["Type-safe outputs", "Dependency injection for testing", "Structured data validation", "IDE autocomplete"],
+                file: "pydantic_ai_demo.py"
+            },
+            langgraph: {
+                name: "LangGraph",
+                icon: "📊",
+                install: "pip install langchain langchain-openai langgraph",
+                why: "Explicit state machine design makes complex workflows debuggable. Integrates with LangSmith for visual debugging.",
+                strengths: ["State machine clarity", "Conditional routing", "LangSmith debugging", "Checkpointing"],
+                file: "langgraph_demo.py"
+            },
+            openai_agents: {
+                name: "OpenAI Agents SDK",
+                icon: "⚡",
+                install: "pip install openai",
+                why: "Minimal abstraction over OpenAI's function calling. Perfect when you want simplicity and are committed to OpenAI models.",
+                strengths: ["Simple handoffs", "Minimal code", "Direct API control"],
+                file: "openai_agents_demo.py"
+            },
+            anthropic: {
+                name: "Anthropic Claude SDK",
+                icon: "🤖",
+                install: "pip install anthropic",
+                why: "Direct access to Claude's capabilities including tool use. Best when you're exclusively using Claude models.",
+                strengths: ["Native Claude support", "Tool use API", "Full control"],
+                file: "anthropic_demo.py"
+            },
+            llamaindex: {
+                name: "LlamaIndex",
+                icon: "📚",
+                install: "pip install llama-index llama-index-llms-openai",
+                why: "Built from the ground up for RAG applications. Best when agents need to work with document retrieval.",
+                strengths: ["RAG integration", "Document connectors", "Knowledge bases"],
+                file: "llamaindex_demo.py"
+            },
+            semantic_kernel: {
+                name: "Semantic Kernel",
+                icon: "🏢",
+                install: "pip install semantic-kernel",
+                why: "Microsoft's enterprise framework with Azure AI integration. Best for organizations in the Microsoft ecosystem.",
+                strengths: ["Azure integration", "Enterprise ready", "Plugin system"],
+                file: "semantic_kernel_demo.py"
+            },
+            crewai: {
+                name: "CrewAI",
+                icon: "👥",
+                install: "pip install crewai crewai-tools",
+                why: "Intuitive role-based design where you define agents by their role, goal, and backstory. Natural fit for team-based workflows.",
+                strengths: ["Role-based design", "Task dependencies", "Hierarchical teams"],
+                file: "crewai_demo.py"
+            },
+            autogen: {
+                name: "AutoGen",
+                icon: "💬",
+                install: "pip install autogen-agentchat autogen-ext[openai]",
+                why: "Powerful group chat patterns for agents that need shared conversation context. Note: v0.4 is a complete rewrite.",
+                strengths: ["Group chat", "Shared context", "Collaborative agents"],
+                file: "autogen_demo.py"
+            },
+            smolagents: {
+                name: "Smolagents",
+                icon: "🚀",
+                install: "pip install smolagents",
+                why: "Hugging Face's lightweight framework for rapid prototyping. Minimal boilerplate, maximum speed.",
+                strengths: ["Minimal code", "Fast prototyping", "Hugging Face ecosystem"],
+                file: "smolagents_demo.py"
+            },
+            haystack: {
+                name: "Haystack",
+                icon: "🔧",
+                install: "pip install haystack-ai",
+                why: "Modular pipeline architecture for NLP applications. Best when you're building document processing pipelines with some agent capabilities.",
+                strengths: ["Modular pipelines", "Document processing", "Production ready"],
+                file: "haystack_demo.py"
+            },
+            dspy: {
+                name: "DSPy",
+                icon: "🧬",
+                install: "pip install dspy",
+                why: "Not an agent framework but a prompt optimizer. Use it alongside any framework to automatically improve your prompts.",
+                strengths: ["Prompt optimization", "Model portability", "Works with all frameworks"],
+                file: "dspy_demo.py"
+            }
+        };
+
+        // Questions for the wizard
+        const questions = [
+            {
+                id: "start",
+                text: "What's your team's experience level with AI agents?",
+                options: [
+                    { text: "New to agents", desc: "First agent project for the team", next: "new_team" },
+                    { text: "Some experience", desc: "Built agents before, evaluating options", next: "experienced" }
+                ]
+            },
+            {
+                id: "new_team",
+                text: "What kind of data will your agents handle?",
+                options: [
+                    { text: "Structured/Regulated", desc: "Insurance, finance, healthcare - data must be validated", result: "pydantic_ai" },
+                    { text: "Unstructured/Flexible", desc: "General purpose, less strict requirements", next: "prototype" }
+                ]
+            },
+            {
+                id: "prototype",
+                text: "How quickly do you need to build?",
+                options: [
+                    { text: "Fast prototype", desc: "Quick iteration, can refactor later", result: "smolagents" },
+                    { text: "Production ready", desc: "Building for long-term use", next: "model_choice" }
+                ]
+            },
+            {
+                id: "experienced",
+                text: "Do you need strict type safety and data validation?",
+                options: [
+                    { text: "Yes, critical", desc: "Outputs must match specific schemas", result: "pydantic_ai" },
+                    { text: "Nice to have", desc: "Flexibility is more important", next: "model_choice" }
+                ]
+            },
+            {
+                id: "model_choice",
+                text: "Which LLM provider will you primarily use?",
+                options: [
+                    { text: "Claude (Anthropic)", desc: "Using Anthropic's Claude models", result: "anthropic" },
+                    { text: "OpenAI only", desc: "Committed to OpenAI models", next: "openai_needs" },
+                    { text: "Multiple/Flexible", desc: "Want to switch between providers", next: "workflow_type" }
+                ]
+            },
+            {
+                id: "openai_needs",
+                text: "What's your primary need with OpenAI?",
+                options: [
+                    { text: "Simple agent handoffs", desc: "Basic multi-agent with transfers", result: "openai_agents" },
+                    { text: "Complex workflows", desc: "State machines, conditional logic", next: "workflow_type" }
+                ]
+            },
+            {
+                id: "workflow_type",
+                text: "What workflow pattern fits your use case?",
+                options: [
+                    { text: "Document retrieval (RAG)", desc: "Agents need to search documents", result: "llamaindex" },
+                    { text: "State machine", desc: "Explicit states and transitions", result: "langgraph" },
+                    { text: "Role-based team", desc: "Agents with distinct roles/goals", result: "crewai" },
+                    { text: "Collaborative chat", desc: "Agents share conversation context", result: "autogen" }
+                ]
+            }
+        ];
+
+        let currentQuestion = "start";
+        let history = [];
+
+        function showPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(panelId + '-panel').classList.add('active');
+            event.target.classList.add('active');
+
+            if (panelId === 'flowchart') {
+                initFlowchart();
+            }
+        }
+
+        function renderQuestion(questionId) {
+            const question = questions.find(q => q.id === questionId);
+            const wizard = document.getElementById('wizard');
+
+            wizard.innerHTML = `
+                <div class="question-card">
+                    <div class="question-number">Question ${history.length + 1}</div>
+                    <div class="question-text">${question.text}</div>
+                    <div class="options">
+                        ${question.options.map((opt, i) => `
+                            <div class="option" onclick="selectOption(${i})">
+                                <div class="option-title">${opt.text}</div>
+                                <div class="option-desc">${opt.desc}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${history.length > 0 ? '<button class="back-btn" onclick="goBack()">← Go Back</button>' : ''}
+                </div>
+            `;
+        }
+
+        function selectOption(optionIndex) {
+            const question = questions.find(q => q.id === currentQuestion);
+            const option = question.options[optionIndex];
+
+            history.push(currentQuestion);
+
+            if (option.result) {
+                showResult(option.result);
+            } else {
+                currentQuestion = option.next;
+                renderQuestion(currentQuestion);
+            }
+        }
+
+        function showResult(frameworkId) {
+            const fw = frameworks[frameworkId];
+            const wizard = document.getElementById('wizard');
+
+            wizard.innerHTML = `
+                <div class="result-card">
+                    <div class="result-icon">${fw.icon}</div>
+                    <div class="result-framework">${fw.name}</div>
+                    <div class="result-why">${fw.why}</div>
+                    <div class="result-details">
+                        <h4>Key Strengths</h4>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            ${fw.strengths.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                        <h4>Get Started</h4>
+                        <code>${fw.install}</code>
+                        <p style="margin-top: 10px; color: #a0a0a0;">Demo: <code>${fw.file}</code></p>
+                    </div>
+                    <button class="restart-btn" onclick="restart()">Start Over</button>
+                </div>
+            `;
+        }
+
+        function goBack() {
+            if (history.length > 0) {
+                currentQuestion = history.pop();
+                renderQuestion(currentQuestion);
+            }
+        }
+
+        function restart() {
+            currentQuestion = "start";
+            history = [];
+            renderQuestion(currentQuestion);
+        }
+
+        // Initialize flowchart
+        function initFlowchart() {
+            const cy = cytoscape({
+                container: document.getElementById('flowchart'),
+                elements: [
+                    // Start node
+                    { data: { id: 'start', label: 'START\nChoose Framework', type: 'start' } },
+
+                    // Question nodes
+                    { data: { id: 'q1', label: 'Need type-safe\nstructured outputs?', type: 'question' } },
+                    { data: { id: 'q2', label: 'Using only\nClaude models?', type: 'question' } },
+                    { data: { id: 'q3', label: 'Using only\nOpenAI models?', type: 'question' } },
+                    { data: { id: 'q4', label: 'Need simple\nagent handoffs?', type: 'question' } },
+                    { data: { id: 'q5', label: 'Need document\nretrieval (RAG)?', type: 'question' } },
+                    { data: { id: 'q6', label: 'Need explicit\nstate machine?', type: 'question' } },
+                    { data: { id: 'q7', label: 'Azure/Enterprise\nenvironment?', type: 'question' } },
+                    { data: { id: 'q8', label: 'Role-based\nteam design?', type: 'question' } },
+                    { data: { id: 'q9', label: 'Collaborative\nshared context?', type: 'question' } },
+                    { data: { id: 'q10', label: 'Quick prototype\nlightweight?', type: 'question' } },
+
+                    // Framework nodes
+                    { data: { id: 'pydantic', label: '✅ Pydantic AI\nType-safe outputs', type: 'result' } },
+                    { data: { id: 'anthropic', label: '✅ Anthropic\nClaude native', type: 'result' } },
+                    { data: { id: 'openai', label: '✅ OpenAI Agents\nSimple handoffs', type: 'result' } },
+                    { data: { id: 'llamaindex', label: '✅ LlamaIndex\nRAG integration', type: 'result' } },
+                    { data: { id: 'langgraph', label: '✅ LangGraph\nState machine', type: 'result' } },
+                    { data: { id: 'semantic', label: '✅ Semantic Kernel\nAzure ecosystem', type: 'result' } },
+                    { data: { id: 'crewai', label: '✅ CrewAI\nRole-based', type: 'result' } },
+                    { data: { id: 'autogen', label: '✅ AutoGen\nGroup chat', type: 'result' } },
+                    { data: { id: 'smolagents', label: '✅ Smolagents\nFast prototype', type: 'result' } },
+                    { data: { id: 'haystack', label: '✅ Haystack\nModular pipelines', type: 'result' } },
+
+                    // Edges
+                    { data: { source: 'start', target: 'q1' } },
+                    { data: { source: 'q1', target: 'pydantic', label: 'Yes' } },
+                    { data: { source: 'q1', target: 'q2', label: 'No' } },
+                    { data: { source: 'q2', target: 'anthropic', label: 'Yes' } },
+                    { data: { source: 'q2', target: 'q3', label: 'No' } },
+                    { data: { source: 'q3', target: 'q4', label: 'Yes' } },
+                    { data: { source: 'q3', target: 'q5', label: 'No' } },
+                    { data: { source: 'q4', target: 'openai', label: 'Yes' } },
+                    { data: { source: 'q4', target: 'q5', label: 'No' } },
+                    { data: { source: 'q5', target: 'llamaindex', label: 'Yes' } },
+                    { data: { source: 'q5', target: 'q6', label: 'No' } },
+                    { data: { source: 'q6', target: 'langgraph', label: 'Yes' } },
+                    { data: { source: 'q6', target: 'q7', label: 'No' } },
+                    { data: { source: 'q7', target: 'semantic', label: 'Yes' } },
+                    { data: { source: 'q7', target: 'q8', label: 'No' } },
+                    { data: { source: 'q8', target: 'crewai', label: 'Yes' } },
+                    { data: { source: 'q8', target: 'q9', label: 'No' } },
+                    { data: { source: 'q9', target: 'autogen', label: 'Yes' } },
+                    { data: { source: 'q9', target: 'q10', label: 'No' } },
+                    { data: { source: 'q10', target: 'smolagents', label: 'Yes' } },
+                    { data: { source: 'q10', target: 'haystack', label: 'No' } }
+                ],
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'label': 'data(label)',
+                            'text-wrap': 'wrap',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'font-size': '10px',
+                            'color': '#fff',
+                            'text-outline-color': '#000',
+                            'text-outline-width': 1,
+                            'padding': '10px'
+                        }
+                    },
+                    {
+                        selector: 'node[type="start"]',
+                        style: {
+                            'background-color': '#7c3aed',
+                            'shape': 'round-rectangle',
+                            'width': 120,
+                            'height': 50
+                        }
+                    },
+                    {
+                        selector: 'node[type="question"]',
+                        style: {
+                            'background-color': '#00d4ff',
+                            'shape': 'diamond',
+                            'width': 130,
+                            'height': 80
+                        }
+                    },
+                    {
+                        selector: 'node[type="result"]',
+                        style: {
+                            'background-color': '#34d399',
+                            'shape': 'round-rectangle',
+                            'width': 120,
+                            'height': 50
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 2,
+                            'line-color': '#666',
+                            'target-arrow-color': '#666',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'label': 'data(label)',
+                            'font-size': '9px',
+                            'color': '#aaa',
+                            'text-background-color': '#1a1a2e',
+                            'text-background-opacity': 0.8,
+                            'text-background-padding': '2px'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'dagre',
+                    rankDir: 'TB',
+                    nodeSep: 50,
+                    rankSep: 80
+                }
+            });
+
+            // If dagre not available, use breadthfirst
+            if (!cy.layout({ name: 'dagre' }).options) {
+                cy.layout({
+                    name: 'breadthfirst',
+                    directed: true,
+                    spacingFactor: 1.5
+                }).run();
+            }
+
+            cy.fit(undefined, 30);
+        }
+
+        // Initialize
+        renderQuestion(currentQuestion);
+    </script>
+
+    <!-- Load dagre for better layout -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+</body>
+</html>
