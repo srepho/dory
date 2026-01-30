@@ -75,6 +75,7 @@ A single reference table covering all evaluation dimensions.
 | Dimension | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
 |-----------|----------|-----------|-------------|-------------------|------------------|
 | **First Release** | Nov 2019 | Aug 2023 | Jun 2024 | Apr 2025 | Jun 2025 |
+| **Stable API Since*** | Dec 2023 (v2.0) | Jan 2024 (v0.1) | Jun 2024 (v0.0.1) | Apr 2025 (pre-release) | Jun 2025 |
 | **Maturity** | 6 years | 2.5 years | 1.5 years | 9 months | 7 months |
 | **GitHub Stars** | 24k | 24k | 14.5k | 6.8k | 4.4k |
 | **License** | Apache 2.0 | MIT | MIT | MIT | MIT |
@@ -82,6 +83,8 @@ A single reference table covering all evaluation dimensions.
 | **Python Version** | 3.9+ | 3.9+ | 3.9+ | 3.10+ | 3.10+ |
 | **Maintainer** | deepset | LangChain Inc | Pydantic | Microsoft | Anthropic |
 | **Install Command** | `pip install haystack-ai` | `pip install -U langgraph` | `pip install pydantic-ai` | `pip install agent-framework --pre` | `pip install claude-agent-sdk` |
+
+*Stable API Since: Relevant for LLM learnability benchmark. DeepSeek V3's training cutoff is July 2024, so frameworks stable before this date may benefit from training data contamination (LLM has "seen" code examples). Pydantic AI (Jun 2024) is borderline; MS Agent Framework and Claude Agent SDK are completely unseen.
 
 ### Code Verbosity (Lines of Code)
 
@@ -178,12 +181,15 @@ This task tests: tool definition, API integration, multi-agent handoff, structur
 
 | Metric | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
 |--------|----------|-----------|-------------|-------------------|------------------|
-| **Success Rate** | 75% | 83% | **92%** | N/A* | N/A* |
-| **Avg Turns to Success** | 3.0 | 4.7 | 3.4 | N/A* | N/A* |
-| **First-Attempt Success** | 25% | 0% | **25%** | N/A* | N/A* |
-| **Optimal Doc Level** | Minimal | Minimal | Moderate | N/A* | N/A* |
+| **Training Data Exposure** | High (6+ months) | High (6+ months) | **Minimal (~1 month)** | None | None |
+| **Success Rate** | 75% | 83% | **92%** | N/A† | N/A† |
+| **Avg Turns to Success** | 3.0 | 4.7 | 3.4 | N/A† | N/A† |
+| **First-Attempt Success** | 25% | 0% | **25%** | N/A† | N/A† |
+| **Optimal Doc Level** | Minimal | Minimal | Moderate | N/A† | N/A† |
 
-*MS Agent Framework and Claude Agent SDK were too new for the benchmark (released after July 2024 cutoff).
+†MS Agent Framework and Claude Agent SDK released after training cutoff (July 2024).
+
+**Training Data Contamination Note:** DeepSeek V3's training data includes code up to July 2024. Haystack and LangGraph were stable for 6+ months before the cutoff, meaning the LLM likely saw many working examples during training. Pydantic AI was released in June 2024—only ~1 month of exposure. This makes Pydantic AI's 92% success rate more impressive: it achieved the highest score despite minimal training data advantage. The LLM had to learn primarily from documentation rather than memorized patterns.
 
 ### Philosophy Summary
 
