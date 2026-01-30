@@ -1,8 +1,8 @@
 # Session Notes - Dory AI Agent Framework Guide
 
-## Last Updated: 2026-01-30
+## Last Updated: 2026-01-30 (Session 5)
 
-## Project Status: UPDATED ✓
+## Project Status: READY FOR DECISION ✓
 
 The Dory repository is a comprehensive AI agent framework comparison guide for an insurance company team evaluating frameworks for building production multi-agent systems.
 
@@ -16,7 +16,9 @@ The Dory repository is a comprehensive AI agent framework comparison guide for a
 dory/
 ├── README.md                    # Project overview with quick decision guide
 ├── blog_post.md                 # Full comparison guide (~150KB)
-├── framework_comparison.md      # NEW: 5-framework comparison (~1400 lines)
+├── framework_comparison.md      # 5-framework comparison (~1800 lines, Mermaid charts)
+├── framework_comparison_print.md # Print version with ASCII charts for PDF
+├── framework_comparison.pdf     # PDF export
 ├── slides.md                    # NEW: 35-slide presentation deck
 ├── decision_flowchart.html      # Interactive web wizard (Cytoscape.js)
 ├── decision_flowchart.py        # CLI decision tool
@@ -94,6 +96,33 @@ dory/
 - Note: New frameworks (MS Agent Framework, Claude Agent SDK) are very new (Apr/Jun 2025)
   and may have API changes. Demos include fallback modes.
 
+### Session 5 (Comprehensive Tables + Updated Learnability Data)
+- Added **Comprehensive Comparison Table** section with 12 sub-tables:
+  - Core Framework Attributes (including "Stable API Since" for contamination context)
+  - Code Verbosity (actual LoC from demo files: 186-363 lines)
+  - Tool Definition & Type Safety
+  - Multi-Agent Patterns
+  - Observability
+  - Error Handling & Recovery
+  - Workflow Capabilities
+  - Production Readiness
+  - Framework Overhead
+  - LLM Learnability
+  - Philosophy Summary
+  - Overall Scores (subjective star ratings)
+
+- Updated **LLM Learnability Benchmark** with new experimental data from fwork-learnability:
+  - Experiment 1 (scraped docs): Pydantic AI 92%, Haystack 75%
+  - Experiment 2 (curated docs): Haystack 100%, LangGraph 100%, OpenAI Agents 100%, Anthropic Agents 92%
+  - Added contamination analysis (all frameworks 100% success with zero docs)
+  - Key insight: Haystack improved 75% → 100% with curated docs vs scraped marketing pages
+  - LangGraph consistently slowest (4.7-5.4 avg turns)
+
+- Fixed DeepSeek V3 training cutoff to **July 2024** (not Dec 2024)
+
+- Created `framework_comparison_print.md` with ASCII charts for PDF export
+- Regenerated `framework_comparison.pdf`
+
 ---
 
 ## Test Results
@@ -125,11 +154,28 @@ dory/
 
 ---
 
-## Potential Future Work
+## Recommended Next Steps
 
+### Immediate (Decision Support)
+- [ ] **Pick a framework** - Data supports decision:
+  - **Pydantic AI** → Type safety, code elegance, regulated industries (RECOMMENDED)
+  - **Haystack** → RAG/document processing primary use case
+  - **LangGraph** → Complex stateful workflows with checkpointing
+- [ ] **Create one-page executive summary** - Full doc is ~1700 lines, need single-page for stakeholders
+
+### Short-term (Validation)
+- [ ] **Build proof-of-concept** with chosen framework using real insurance scenario
+- [ ] **Run Tier 2/3 learnability tests** - Current benchmark only tests classification, not tool use or agent orchestration
+- [ ] **Re-test Pydantic AI with curated docs** - Scored 92% with scraped docs, likely 100% with curated
+
+### Medium-term (Production Readiness)
+- [ ] **Cost/latency benchmarking** - Token counting and timing across frameworks
+- [ ] **Set up observability** - Logfire (Pydantic AI), LangSmith (LangGraph), or OpenTelemetry
+- [ ] **Security review** - Data handling, API key management, audit logging for insurance context
+- [ ] **Deployment examples** - Docker, cloud deployment patterns
+
+### Backlog
 - [ ] Add more test cases beyond Brisbane
-- [ ] Add comparison benchmarks (latency, token usage, cost)
-- [ ] Add deployment examples (Docker, cloud)
 - [ ] Record video walkthrough of decision wizard
 - [ ] Add framework version pinning for reproducibility
 
