@@ -66,6 +66,140 @@ Claude SDK      ████░░░░░░░░░░░░░░░░░�
 
 ---
 
+## Comprehensive Comparison Table
+
+A single reference table covering all evaluation dimensions.
+
+### Core Framework Attributes
+
+| Dimension | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|-----------|----------|-----------|-------------|-------------------|------------------|
+| **First Release** | Nov 2019 | Aug 2023 | Jun 2024 | Apr 2025 | Jun 2025 |
+| **Maturity** | 6 years | 2.5 years | 1.5 years | 9 months | 7 months |
+| **GitHub Stars** | 24k | 24k | 14.5k | 6.8k | 4.4k |
+| **License** | Apache 2.0 | MIT | MIT | MIT | MIT |
+| **Primary Language** | Python | Python | Python | Python/C#/TS | Python |
+| **Python Version** | 3.9+ | 3.9+ | 3.9+ | 3.10+ | 3.10+ |
+| **Maintainer** | deepset | LangChain Inc | Pydantic | Microsoft | Anthropic |
+| **Install Command** | `pip install haystack-ai` | `pip install -U langgraph` | `pip install pydantic-ai` | `pip install agent-framework --pre` | `pip install claude-agent-sdk` |
+
+### Code Verbosity (Lines of Code)
+
+| Metric | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|--------|----------|-----------|-------------|-------------------|------------------|
+| **Demo File LoC** | 203 | 211 | 186 | 248 | 363 |
+| **Core Logic LoC*** | ~110 | ~120 | ~90 | ~120 | ~180 |
+| **Verbosity Rating** | Medium | Medium | **Low** | Medium | High |
+
+*Core logic excludes docstrings, error handling, and fallback code.
+
+### Tool Definition & Type Safety
+
+| Aspect | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|--------|----------|-----------|-------------|-------------------|------------------|
+| **Tool Definition** | `@tool` decorator or JSON schema | `@tool` from langchain_core | `@agent.tool` decorator | `@tool` decorator | `@tool(name, desc, params)` |
+| **Schema Style** | Explicit JSON or `Annotated` | LangChain tool format | Pydantic models | Python type hints | Dict-based schema |
+| **Type Safety** | Partial | Partial | **Strong** | Partial | Partial |
+| **Structured Output** | Via integrations | Via LangChain | Native Pydantic models | Manual | Manual |
+| **Dependency Injection** | Manual | Manual | `RunContext` pattern | Manual | Via hook context |
+
+### Multi-Agent Patterns
+
+| Pattern | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|---------|----------|-----------|-------------|-------------------|------------------|
+| **Sequential** | Pipeline components | Graph edges | Programmatic hand-off | Agent chaining | Manual orchestration |
+| **Delegation** | Agent as ComponentTool | Subgraphs | `@agent.tool` calling agents | Nested agents | MCP tool calls |
+| **Supervisor/Router** | Coordinator + tools | Conditional routing | Application logic | Orchestrator pattern | Custom routing |
+| **State Machine** | Pipeline branching | **StateGraph (native)** | Pydantic Graph | Workflow graphs | Manual state |
+| **Parallel Execution** | AsyncPipeline | Parallel nodes | `asyncio.gather` | Parallel branches | Multiple agents |
+| **Human-in-Loop** | External | **First-class** | Manual | Workflow pause | Permission hooks |
+
+### Observability
+
+| Aspect | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|--------|----------|-----------|-------------|-------------------|------------------|
+| **Built-in** | No | No | No | **Yes** | Hooks only |
+| **First-party Tool** | — | LangSmith | Logfire | Azure Monitor | — |
+| **Standard** | Varies | Proprietary | OpenTelemetry | **OpenTelemetry** | Custom |
+| **Setup Effort** | Medium (3/5) | **Low (1/5)** | **Low (1/5)** | **Low (1/5)** | High (5/5) |
+| **Token Tracking** | Via integration | Yes | Yes | Yes | DIY |
+| **Self-host Option** | Yes | No | Enterprise | Yes | Yes (DIY) |
+| **Free Tier** | Varies | Yes | Yes | Azure free tier | N/A |
+
+### Error Handling & Recovery
+
+| Aspect | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|--------|----------|-----------|-------------|-------------------|------------------|
+| **Validation Errors** | Component-level | State validation | **Pydantic models** | Type hints | Hook-based |
+| **LLM Failures** | Retry via integration | **Checkpoint + resume** | Auto-retry to LLM | Middleware | ProcessError |
+| **Tool Failures** | Pipeline continues | Node-level handling | Error fed to LLM | Filters | PostToolUseFailure hook |
+| **Recovery Mechanism** | Pipeline breakpoints | **Checkpoint resume** | Reflection loop | State snapshots | Session resume |
+| **Idempotency Support** | Manual | **First-class** | Manual | Manual | Via hooks |
+
+### Workflow Capabilities
+
+| Capability | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|------------|----------|-----------|-------------|-------------------|------------------|
+| **Branching** | ConditionalRouter | `add_conditional_edges()` | Application logic | Workflow graphs | Hook decisions |
+| **Loops** | Component cycles | Graph cycles | While loops | Workflow loops | Recursive prompts |
+| **Checkpointing** | No | **Yes (durability modes)** | No | Yes | Via hooks |
+| **Long-running Tasks** | Limited | **Excellent** | Manual | Good | Manual |
+
+### Production Readiness
+
+| Factor | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|--------|----------|-----------|-------------|-------------------|------------------|
+| **Enterprise Use** | Yes (deepset cloud) | Yes (Klarna, Replit) | Growing | Yes (Azure) | Growing |
+| **Documentation** | **Extensive** | **Extensive** | Good | MS Learn | Growing |
+| **Breaking Changes** | **Stable (v2)** | Evolving | Evolving | Very new | Very new |
+| **Risk Level** | **Low (1/5)** | Low-Medium (2/5) | Low-Medium (2/5) | Medium (3/5) | High (5/5) |
+| **Jan 2026 Status** | ✅ Production ready | ✅ Production ready | ✅ Production ready | ✅ Pre-release, functional | ⚠️ Needs CLI setup |
+
+### Framework Overhead
+
+| Factor | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|--------|----------|-----------|-------------|-------------------|------------------|
+| **Dependencies** | Medium | Medium (LangChain) | **Light** | **Light** | **Light** |
+| **Startup Time** | Medium | Medium | **Fast** | **Fast** | **Fast** |
+| **Memory Footprint** | Higher (RAG features) | Medium | **Light** | **Light** | **Light** |
+| **Model Lock-in** | None | None | None | Azure-optimized | **Claude-only** |
+
+### LLM Learnability (DeepSeek V3 Benchmark)
+
+| Metric | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|--------|----------|-----------|-------------|-------------------|------------------|
+| **Success Rate** | 75% | 83% | **92%** | N/A* | N/A* |
+| **Avg Turns to Success** | 3.0 | 4.7 | 3.4 | N/A* | N/A* |
+| **First-Attempt Success** | 25% | 0% | **25%** | N/A* | N/A* |
+| **Optimal Doc Level** | Minimal | Minimal | Moderate | N/A* | N/A* |
+
+*MS Agent Framework and Claude Agent SDK were too new for the benchmark (released after Dec 2024 cutoff).
+
+### Philosophy Summary
+
+| Framework | Mental Model | Best Suited For |
+|-----------|--------------|-----------------|
+| **Haystack** | Pipelines of swappable components | RAG, document processing, stability-focused teams |
+| **LangGraph** | Agents as state machines | Complex workflows, explicit control, LangChain users |
+| **Pydantic AI** | Type safety as foundation | Regulated industries, type-first developers |
+| **MS Agent Framework** | Agents when necessary, functions otherwise | Azure/.NET shops, AutoGen/SK migrators |
+| **Claude Agent SDK** | Claude Code as infrastructure | Claude-native apps, fine-grained permission control |
+
+### Overall Scores (Subjective)
+
+| Category | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
+|----------|----------|-----------|-------------|-------------------|------------------|
+| **Ease of Setup** | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
+| **Code Elegance** | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Type Safety** | ⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+| **Workflow Control** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Observability** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| **Production Ready** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+| **Community/Docs** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| **OVERALL** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+
+---
+
 ## Haystack
 
 **The most mature framework** - Originally built for semantic search and QA, evolved to support LLM agents.
