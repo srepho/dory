@@ -377,13 +377,13 @@ eligibility_result = await eligibility_agent.run(...)
 - DeepSeek V3 (July 2024 cutoff)
 - "Turns to Working Code" with error feedback
 - Up to 10 iterations per attempt
-- 48 total trials
+- 89 total trials across 2 experiments
 
 **Source:** github.com/srepho/fwork-learnability
 
 ---
 
-## Learnability Results
+## Experiment 1: Scraped Docs (48 trials)
 
 | Framework | Success Rate | Avg Turns | First-Attempt |
 |-----------|-------------|-----------|---------------|
@@ -392,34 +392,60 @@ eligibility_result = await eligibility_agent.run(...)
 | LangGraph | 83% | 4.7 | **0%** |
 | Haystack | 75% | 3.0 | 25% |
 
-**Pydantic AI:** Highest success, good first-attempt rate
-**LangGraph:** Zero first-attempts, most iterations needed
+**Problem:** Scraped docs were marketing pages, not code examples
+
+---
+
+## Experiment 2: Curated Docs (41 trials)
+
+| Framework | Success Rate | Avg Turns | Doc Impact |
+|-----------|-------------|-----------|------------|
+| **Haystack** | **100%** | **1.75** | +57% faster |
+| **LangGraph** | **100%** | 5.4 | - |
+| **OpenAI Agents** | **100%** | **1.65** | - |
+| Anthropic Agents | 92% | 2.1 | +44% faster |
+
+**Key insight:** Haystack jumped 75% → 100% with real code examples
+
+---
+
+## Contamination Analysis
+
+All frameworks: **100% success with zero documentation**
+
+| Framework | Success@None | Contamination |
+|-----------|-------------|---------------|
+| All tested | 100% | **HIGH** |
+
+**Implication:** DeepSeek V3 has memorized all frameworks
+- Benchmark measures "recall + refinement"
+- But docs still reduce turns by 40-60%
 
 ---
 
 ## Learnability: Key Insights
 
-**1. Pydantic AI is most learnable**
-- Highest success rate (92%)
-- LLMs pick it up fastest
+**1. Documentation quality > quantity**
+- Minimal curated docs beat full scraped docs
+- Real code examples essential
 
-**2. LangGraph has steepest learning curve**
-- Zero first-attempt successes
-- 4.7 average turns (highest)
+**2. LangGraph consistently slowest**
+- 4.7-5.4 avg turns across both experiments
+- Steeper learning curve even for LLMs
 
-**3. Counterintuitive docs finding**
-- Minimal docs sometimes beat full docs
-- Full docs captured marketing, not code
+**3. All frameworks highly contaminated**
+- 100% success with no docs
+- Can't measure true "learnability from scratch"
 
 ---
 
-## Error Patterns (17% failure rate)
+## Error Patterns
 
-| Error Type | Count | Example |
-|------------|-------|---------|
-| **Syntax errors** | 40 | Unterminated strings |
-| **API hallucinations** | 26 | Fabricated `result_type` param |
-| **Logic errors** | 15 | Wrong output, valid code |
+| Error Type | Count | % | Example |
+|------------|-------|---|---------|
+| **SyntaxError** | 40 | 54% | Unterminated strings |
+| **AssertionError** | 15 | 20% | Wrong output |
+| **API Hallucination** | 26 | - | Fabricated `result_type` |
 
 **Implication:** Even LLMs hallucinate API parameters
 

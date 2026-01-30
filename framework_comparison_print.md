@@ -175,9 +175,13 @@ This task tests: tool definition, API integration, multi-agent handoff, structur
 
 ### LLM Learnability (DeepSeek V3 Benchmark)
 
-**Experiment:** Measured how easily an LLM (DeepSeek V3, training cutoff July 2024) can produce working code for each framework. The LLM was given a simple classification task and iteratively refined its code based on error feedback (up to 10 attempts). This simulates AI-assisted development where developers use LLMs to generate framework-specific code.
+**Experiment:** Measured how easily an LLM (DeepSeek V3, training cutoff July 2024) can produce working code for each framework. The LLM was given a simple classification task (insurance claims) and iteratively refined its code based on error feedback (up to 10 attempts). This simulates AI-assisted development where developers use LLMs to generate framework-specific code.
 
 **What it measures:** Framework API intuitiveness, documentation clarity, and how well the framework patterns match common LLM training data. Higher success rate = LLM produces working code more reliably. Lower turns = faster convergence to working solution.
+
+**Source:** [github.com/srepho/fwork-learnability](https://github.com/srepho/fwork-learnability)
+
+#### Experiment 1: Scraped Documentation (48 trials)
 
 | Metric | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
 |--------|----------|-----------|-------------|-------------------|------------------|
@@ -189,7 +193,38 @@ This task tests: tool definition, API integration, multi-agent handoff, structur
 
 †MS Agent Framework and Claude Agent SDK released after training cutoff (July 2024).
 
-**Training Data Contamination Note:** DeepSeek V3's training data includes code up to July 2024. Haystack and LangGraph were stable for 6+ months before the cutoff, meaning the LLM likely saw many working examples during training. Pydantic AI was released in June 2024—only ~1 month of exposure. This makes Pydantic AI's 92% success rate more impressive: it achieved the highest score despite minimal training data advantage. The LLM had to learn primarily from documentation rather than memorized patterns.
+#### Experiment 2: Curated Documentation (41 trials)
+
+A follow-up experiment with hand-curated documentation (real code examples instead of scraped landing pages):
+
+| Metric | Haystack | LangGraph | OpenAI Agents | Anthropic Agents |
+|--------|----------|-----------|---------------|------------------|
+| **Success Rate** | **100%** | **100%** | **100%** | 92% |
+| **Avg Turns to Success** | **1.75** | 5.4 | **1.65** | 2.1 |
+| **Success@None (no docs)** | 100% | 100% | 100% | 100% |
+
+**Key insight:** Curated docs dramatically improved Haystack (75% → 100%) and reduced turns. The original experiment's scraped "full docs" were actually marketing pages with no code examples.
+
+#### Contamination Analysis
+
+All frameworks showed **high contamination** (100% success with zero documentation), confirming DeepSeek V3 has these frameworks memorized from training data:
+
+| Framework | Success@None | API Version Used | Contamination |
+|-----------|-------------|------------------|---------------|
+| Haystack | 100% | v2 (modern) | HIGH - uses 2024 APIs |
+| LangGraph | 100% | v0/v1 mixed | HIGH - 50/50 version mix |
+| Pydantic AI | 100% | current | HIGH - despite June 2024 release |
+| OpenAI Agents | 100% | current | HIGH |
+| Anthropic Agents | 100% | current | HIGH |
+
+**Implication:** The benchmark measures "recall + refinement" rather than pure learnability. However, documentation still reduces average turns by 40-60%, showing its value even when the LLM has memorized patterns.
+
+#### Key Findings
+
+1. **Documentation quality matters more than quantity**: Minimal curated docs (real code) outperformed full scraped docs (marketing pages)
+2. **LangGraph consistently slowest**: 4.7-5.4 avg turns across both experiments, suggesting steeper learning curve
+3. **Pydantic AI performed well despite minimal training exposure**: 92% success with only ~1 month in training data
+4. **All frameworks highly contaminated**: 100% success with no docs means true "learnability from scratch" can't be measured with DeepSeek V3
 
 ### Philosophy Summary
 
@@ -1689,21 +1724,24 @@ python claude_agent_sdk_demo.py
 
 ## LLM Learnability Benchmark
 
-A separate study measured **how easily an LLM can produce working code** with each framework, given access to documentation.
+A study measured **how easily an LLM can produce working code** with each framework, given access to documentation.
 
 **Source:** [github.com/srepho/fwork-learnability](https://github.com/srepho/fwork-learnability)
 
 ### Methodology
 
-- **Model:** DeepSeek V3 (training cutoff July 2024) as a "temporal firewall"
+- **Model:** DeepSeek V3 (training cutoff July 2024)
 - **Approach:** "Turns to Working Code" - LLM attempts implementation, receives error feedback, iterates up to 10 times
 - **Documentation levels:** None, Minimal, Moderate, Full
-- **Task:** Tier 1 classification tasks (48 total trials)
+- **Task:** Tier 1 insurance claims classification
+- **Total trials:** 89 across two experiments
 
-### Results
+### Experiment 1: Scraped Documentation (48 trials)
+
+Initial experiment using auto-scraped documentation from framework websites.
 
 ```
-LLM Learnability: Success Rate (%)
+Experiment 1: Success Rate with Scraped Docs (%)
 
 Pydantic AI     ██████████████████████████████████████████████  92% ★
 Direct API      █████████████████████████████████████████░░░░░  83%
@@ -1713,7 +1751,7 @@ Haystack        █████████████████████�
 ```
 
 ```
-Average Turns to Working Code (lower = easier)
+Experiment 1: Average Turns (lower = easier)
 
 Direct API      ████░░░░░░░░  2.4 ★ Fastest
 Haystack        ██████░░░░░░  3.0
@@ -1722,57 +1760,105 @@ LangGraph       ██████████░░  4.7 ⚠ Most iterations
                 0     2     4     6
 ```
 
-| Framework | Success Rate | Avg Turns to Success | First-Attempt Success | Optimal Doc Level |
-|-----------|-------------|---------------------|----------------------|-------------------|
-| **Pydantic AI** | **92%** (11/12) | 3.4 | 3/12 (25%) | Moderate |
-| **Direct API** | 83% (10/12) | 2.4 | 1/12 (8%) | Moderate |
-| **LangGraph** | 83% (10/12) | 4.7 | 0/12 (0%) | Minimal |
-| **Haystack** | 75% (9/12) | 3.0 | 3/12 (25%) | Minimal |
+| Framework | Success Rate | Avg Turns | First-Attempt | Best Doc Level |
+|-----------|-------------|-----------|---------------|----------------|
+| **Pydantic AI** | **92%** (11/12) | 3.4 | 25% | Moderate |
+| **Direct API** | 83% (10/12) | **2.4** | 8% | Moderate |
+| **LangGraph** | 83% (10/12) | 4.7 | 0% | Minimal |
+| **Haystack** | 75% (9/12) | 3.0 | 25% | Minimal |
+
+### Experiment 2: Curated Documentation (41 trials)
+
+Follow-up experiment with hand-curated docs containing real code examples.
+
+```
+Experiment 2: Success Rate with Curated Docs (%)
+
+Haystack        ██████████████████████████████████████████████████  100% ★
+LangGraph       ██████████████████████████████████████████████████  100% ★
+OpenAI Agents   ██████████████████████████████████████████████████  100% ★
+Anthropic Agts  ██████████████████████████████████████████████░░░░   92%
+                0%       25%       50%       75%      100%
+```
+
+```
+Experiment 2: Average Turns (lower = easier)
+
+OpenAI Agents   ███░░░░░░░░░  1.65 ★ Fastest
+Haystack        ████░░░░░░░░  1.75 ★
+Anthropic Agts  ████░░░░░░░░  2.1
+LangGraph       ███████████░  5.4 ⚠ Most iterations
+                0     2     4     6
+```
+
+| Framework | Success Rate | Avg Turns | Doc Impact (none→minimal) |
+|-----------|-------------|-----------|---------------------------|
+| **Haystack** | **100%** | **1.75** | 2.3t → 1.0t (**+57% faster**) |
+| **LangGraph** | **100%** | 5.4 | 4.7t → 7.5t (slower*) |
+| **OpenAI Agents** | **100%** | **1.65** | 2.0t → 2.0t (no change) |
+| **Anthropic Agents** | 92% | 2.1 | 3.0t → 1.7t (**+44% faster**) |
+
+*LangGraph's increase likely due to small sample size at minimal level.
+
+### Contamination Analysis
+
+All frameworks showed **100% success with zero documentation**, confirming high training data contamination:
+
+| Framework | Success@None | API Version | Contamination Level |
+|-----------|-------------|-------------|---------------------|
+| Haystack | 100% | v2 (modern) | **HIGH** - uses 2024 APIs |
+| LangGraph | 100% | v0/v1 mixed | **HIGH** - 50/50 version mix |
+| Pydantic AI | 100% | current | **HIGH** - despite June 2024 release |
+| OpenAI Agents | 100% | current | **HIGH** |
+| Anthropic Agents | 100% | current | **HIGH** |
+
+**Implication:** DeepSeek V3's training data includes all tested frameworks. The benchmark measures "recall + refinement" rather than pure learnability from scratch.
 
 ### Key Findings
 
-**1. Pydantic AI is the most learnable framework**
-- Highest success rate (92%)
-- Good first-attempt success rate (25%)
-- Benefits from moderate documentation
+**1. Documentation quality matters more than quantity**
+- Haystack improved from 75% → 100% when using curated docs vs scraped docs
+- Original "full docs" were marketing pages with no code examples
+- Minimal curated docs (real code) outperformed comprehensive scraped docs
 
-**2. LangGraph requires more iterations**
-- Zero first-attempt successes
-- Highest average turns (4.7) despite 83% eventual success
+**2. LangGraph consistently slowest to converge**
+- 4.7-5.4 avg turns across both experiments
+- Zero first-attempt successes in Experiment 1
 - Suggests steeper learning curve even for LLMs
 
-**3. Counterintuitive documentation results**
-- Haystack and LangGraph performed **worse** with full documentation
-- Minimal docs outperformed full docs in some cases
-- Likely cause: full docs captured marketing content rather than code examples
+**3. Even with contamination, docs reduce turns by 40-60%**
+- Haystack: 2.3 turns (no docs) → 1.0 turns (minimal docs)
+- Anthropic Agents: 3.0 turns → 1.7 turns
+- Docs provide correct patterns without trial-and-error
 
-**4. High model contamination detected**
-- All frameworks achieved 67-100% success with **zero documentation**
-- Suggests DeepSeek V3's training data includes these frameworks
-- "Temporal firewall" less effective than hoped
+**4. Too much documentation can hurt**
+- Anthropic Agents had its only failure (1/12) at "full" documentation level
+- Suggests excessive context can confuse the model
 
-### Error Patterns (17% failure rate across all trials)
+### Error Patterns
 
-| Error Type | Occurrences | Example |
-|------------|-------------|---------|
-| **Syntax errors** | 40 | Unterminated strings |
-| **API hallucinations** | 26 | PydanticAI's fabricated `result_type` parameter |
-| **Logic errors** | 15 | Incorrect output despite valid code |
+| Error Type | Count | % | Example |
+|------------|-------|---|---------|
+| **SyntaxError** | 40 | 54% | Unterminated strings, fails to recover |
+| **AssertionError** | 15 | 20% | Wrong classification despite valid code |
+| **TypeError** | 7 | 9% | Wrong method signatures |
+| **API Hallucination** | 26 | - | PydanticAI's fabricated `result_type` (15x) |
 
 ### Implications for Framework Selection
 
 | If you prioritize... | Choose... | Why |
 |---------------------|-----------|-----|
-| **LLM-assisted development** | Pydantic AI | Highest success rate, LLMs learn it fastest |
-| **Minimal documentation needs** | Haystack or LangGraph | Work well with minimal docs |
-| **First-attempt correctness** | Pydantic AI or Haystack | 25% first-attempt success |
-| **Eventual success with iteration** | Any (all >75%) | All frameworks reachable with feedback |
+| **Fastest LLM-assisted dev** | OpenAI Agents or Haystack | 1.65-1.75 avg turns with curated docs |
+| **Highest eventual success** | Any with good docs | All reach 92-100% with curated docs |
+| **Works without docs** | Any (contaminated) | All 100% at none level |
+| **Steepest learning curve** | Avoid LangGraph | Consistently 4.7-5.4 turns |
 
 ### Caveats
 
-- Only Tier 1 (basic) tasks tested; Tier 2-3 (tool use, agent-native) pending
-- Documentation fetcher captured landing pages, not tutorials
-- Results reflect LLM learnability, not necessarily human learnability
+- Only Tier 1 (classification) tasks tested; Tier 2 (tool use) and Tier 3 (agent-native) pending
+- High contamination means results reflect "memorization + refinement" not pure learnability
+- Human learnability may differ from LLM learnability
+- Pydantic AI not re-tested with curated docs (would likely improve)
 
 ---
 
