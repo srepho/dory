@@ -85,13 +85,19 @@ A single reference table covering all evaluation dimensions.
 
 ### Code Verbosity (Lines of Code)
 
+**Test Task:** Australian insurance catastrophic (CAT) event verification using a two-agent pipeline:
+1. **Weather Agent** (with tools): Geocodes a location (city, state, postcode) via Nominatim API → fetches historical weather observations from Bureau of Meteorology (BOM) API
+2. **Eligibility Agent** (pure LLM reasoning): Applies business rules to determine claim eligibility (APPROVED if both thunderstorms AND strong wind observed, REVIEW if one, DENIED if neither)
+
+This task tests: tool definition, API integration, multi-agent handoff, structured output, and error handling.
+
 | Metric | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
 |--------|----------|-----------|-------------|-------------------|------------------|
 | **Demo File LoC** | 203 | 211 | 186 | 248 | 363 |
 | **Core Logic LoC*** | ~110 | ~120 | ~90 | ~120 | ~180 |
 | **Verbosity Rating** | Medium | Medium | **Low** | Medium | High |
 
-*Core logic excludes docstrings, error handling, and fallback code.
+*Core logic excludes docstrings, error handling, and fallback code. Claude Agent SDK includes MCP server setup and fallback mode, inflating LoC.
 
 ### Tool Definition & Type Safety
 
@@ -165,6 +171,10 @@ A single reference table covering all evaluation dimensions.
 | **Model Lock-in** | None | None | None | Azure-optimized | **Claude-only** |
 
 ### LLM Learnability (DeepSeek V3 Benchmark)
+
+**Experiment:** Measured how easily an LLM (DeepSeek V3, training cutoff Dec 2024) can produce working code for each framework. The LLM was given a simple classification task and iteratively refined its code based on error feedback (up to 10 attempts). This simulates AI-assisted development where developers use LLMs to generate framework-specific code.
+
+**What it measures:** Framework API intuitiveness, documentation clarity, and how well the framework patterns match common LLM training data. Higher success rate = LLM produces working code more reliably. Lower turns = faster convergence to working solution.
 
 | Metric | Haystack | LangGraph | Pydantic AI | MS Agent Framework | Claude Agent SDK |
 |--------|----------|-----------|-------------|-------------------|------------------|
