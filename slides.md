@@ -374,7 +374,7 @@ eligibility_result = await eligibility_agent.run(...)
 **Question:** How easily can an LLM produce working code with each framework?
 
 **Method:**
-- DeepSeek V3 (Dec 2024 cutoff)
+- DeepSeek V3 (July 2024 cutoff)
 - "Turns to Working Code" with error feedback
 - Up to 10 iterations per attempt
 - 48 total trials

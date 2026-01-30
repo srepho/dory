@@ -169,7 +169,7 @@ This task tests: tool definition, API integration, multi-agent handoff, structur
 
 ### LLM Learnability (DeepSeek V3 Benchmark)
 
-**Experiment:** Measured how easily an LLM (DeepSeek V3, training cutoff Dec 2024) can produce working code for each framework. The LLM was given a simple classification task and iteratively refined its code based on error feedback (up to 10 attempts). This simulates AI-assisted development where developers use LLMs to generate framework-specific code.
+**Experiment:** Measured how easily an LLM (DeepSeek V3, training cutoff July 2024) can produce working code for each framework. The LLM was given a simple classification task and iteratively refined its code based on error feedback (up to 10 attempts). This simulates AI-assisted development where developers use LLMs to generate framework-specific code.
 
 **What it measures:** Framework API intuitiveness, documentation clarity, and how well the framework patterns match common LLM training data. Higher success rate = LLM produces working code more reliably. Lower turns = faster convergence to working solution.
 
@@ -180,7 +180,7 @@ This task tests: tool definition, API integration, multi-agent handoff, structur
 | **First-Attempt Success** | 25% | 0% | **25%** | N/A* | N/A* |
 | **Optimal Doc Level** | Minimal | Minimal | Moderate | N/A* | N/A* |
 
-*MS Agent Framework and Claude Agent SDK were too new for the benchmark (released after Dec 2024 cutoff).
+*MS Agent Framework and Claude Agent SDK were too new for the benchmark (released after July 2024 cutoff).
 
 ### Philosophy Summary
 
@@ -1682,7 +1682,7 @@ A separate study measured **how easily an LLM can produce working code** with ea
 
 ### Methodology
 
-- **Model:** DeepSeek V3 (training cutoff Dec 2024) as a "temporal firewall"
+- **Model:** DeepSeek V3 (training cutoff July 2024) as a "temporal firewall"
 - **Approach:** "Turns to Working Code" - LLM attempts implementation, receives error feedback, iterates up to 10 times
 - **Documentation levels:** None, Minimal, Moderate, Full
 - **Task:** Tier 1 classification tasks (48 total trials)
