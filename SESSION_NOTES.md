@@ -1,8 +1,8 @@
 # Session Notes - Dory AI Agent Framework Guide
 
-## Last Updated: 2026-01-23
+## Last Updated: 2026-01-30
 
-## Project Status: COMPLETE ✓
+## Project Status: UPDATED ✓
 
 The Dory repository is a comprehensive AI agent framework comparison guide for an insurance company team evaluating frameworks for building production multi-agent systems.
 
@@ -16,6 +16,8 @@ The Dory repository is a comprehensive AI agent framework comparison guide for a
 dory/
 ├── README.md                    # Project overview with quick decision guide
 ├── blog_post.md                 # Full comparison guide (~150KB)
+├── framework_comparison.md      # NEW: 5-framework comparison (~1400 lines)
+├── slides.md                    # NEW: 35-slide presentation deck
 ├── decision_flowchart.html      # Interactive web wizard (Cytoscape.js)
 ├── decision_flowchart.py        # CLI decision tool
 ├── shared_utils.py              # Geocoding + BOM weather utilities
@@ -23,10 +25,12 @@ dory/
 ├── CLAUDE.md                    # Project instructions
 ├── .gitignore                   # Excludes .env, pycache, etc.
 │
-├── *_demo.py (11 files)         # Individual framework demos
+├── *_demo.py (13 files)         # Individual framework demos
 │   ├── pydantic_ai_demo.py
 │   ├── langgraph_demo.py
-│   ├── autogen_demo.py
+│   ├── autogen_demo.py          # Old AutoGen 0.4+
+│   ├── ms_agent_framework_demo.py  # NEW: Microsoft Agent Framework
+│   ├── claude_agent_sdk_demo.py    # NEW: Claude Agent SDK
 │   ├── crewai_demo.py
 │   ├── openai_agents_demo.py
 │   ├── anthropic_demo.py
@@ -72,6 +76,23 @@ dory/
   - ✓ anthropic_demo.py end-to-end
   - ✓ dspy_demo.py end-to-end
   - ✓ All 11 tutorials valid JSON + Python syntax
+
+### Session 4 (Framework Comparison + New Demos)
+- Created `framework_comparison.md` - comprehensive comparison of 5 frameworks:
+  - Haystack, LangGraph, Pydantic AI, MS Agent Framework, Claude Agent SDK
+- Added sections:
+  - Philosophy & mental models for each framework
+  - Observability deep dive
+  - Failure modes & error handling
+  - Complex workflow patterns
+  - Real-world implementation testing
+  - LLM Learnability benchmark (from fwork-learnability repo)
+- Created `slides.md` - 35-slide presentation deck
+- Created new demo implementations:
+  - `ms_agent_framework_demo.py` - Microsoft Agent Framework (new unified framework)
+  - `claude_agent_sdk_demo.py` - Claude Agent SDK with MCP tools
+- Note: New frameworks (MS Agent Framework, Claude Agent SDK) are very new (Apr/Jun 2025)
+  and may have API changes. Demos include fallback modes.
 
 ---
 

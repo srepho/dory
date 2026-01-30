@@ -36,22 +36,37 @@ AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o-mini")
 # Hugging Face (for Smolagents)
 HUGGINGFACE_TOKEN = os.getenv("HUGGINGFACE_TOKEN") or os.getenv("HF_TOKEN")
 
-# Configure OpenAI-compatible clients to use z.ai if available
-if ZHIPU_API_KEY:
+# DeepSeek API (OpenAI-compatible)
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+DEEPSEEK_API_BASE = "https://api.deepseek.com"
+
+# Configure OpenAI-compatible clients - priority: DeepSeek > z.ai > OpenAI
+if DEEPSEEK_API_KEY:
+    os.environ["OPENAI_API_KEY"] = DEEPSEEK_API_KEY
+    os.environ["OPENAI_BASE_URL"] = DEEPSEEK_API_BASE
+    USE_ZAI = False
+    USE_DEEPSEEK = True
+    # DeepSeek models: deepseek-chat, deepseek-reasoner
+    DEFAULT_MODEL = "deepseek-chat"
+    print(f"✓ Using DeepSeek API: {DEEPSEEK_API_KEY[:12]}...")
+elif ZHIPU_API_KEY:
     os.environ["OPENAI_API_KEY"] = ZHIPU_API_KEY
     os.environ["OPENAI_BASE_URL"] = ZHIPU_API_BASE.replace("/chat/completions", "")
     USE_ZAI = True
+    USE_DEEPSEEK = False
     # z.ai models: glm-4.5, glm-4.5-air, glm-4.6, glm-4.7
     DEFAULT_MODEL = "glm-4.5-air"  # Fast and cheap for demos
     print(f"✓ Using z.ai API: {ZHIPU_API_KEY[:12]}...")
 elif os.getenv("OPENAI_API_KEY"):
     USE_ZAI = False
+    USE_DEEPSEEK = False
     DEFAULT_MODEL = "gpt-4o-mini"
     print(f"✓ Using OpenAI API: {os.getenv('OPENAI_API_KEY')[:8]}...")
 else:
     USE_ZAI = False
+    USE_DEEPSEEK = False
     DEFAULT_MODEL = "gpt-4o-mini"
-    print("⚠ Warning: No API key found. Set ZHIPU_API_KEY or OPENAI_API_KEY in .env")
+    print("⚠ Warning: No API key found. Set DEEPSEEK_API_KEY, ZHIPU_API_KEY, or OPENAI_API_KEY in .env")
 
 
 # ============================================================================
