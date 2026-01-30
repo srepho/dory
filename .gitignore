@@ -53,3 +53,8 @@ mlartifacts/
 # Misc
 *.log
 *.tmp
+
+# Project-specific notes (not for public repo)
+CLAUDE.md
+SESSION_NOTES.md
+NEXT_STEPS.md
